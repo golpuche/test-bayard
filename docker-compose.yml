@@ -1,0 +1,50 @@
+version: "3.5"
+
+services:
+  php:
+    user: "0"
+    build:
+      context: .
+      target: php_alpine
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./composer.json:/app/composer.json
+      - ./composer.lock:/app/composer.lock
+      - ./symfony.lock:/app/symfony.lock
+      - ./config:/app/config:rw
+      - ./src:/app/src
+      - ./tests:/tests
+
+  db:
+    image: mongo:${DATABASE_VERSION}
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - ${DATABASE_PORT}:27017
+    expose:
+      - ${DATABASE_PORT}
+    volumes:
+      - data-documents:/data/db
+
+  nginx:
+    build:
+      context: .
+      target: nginx
+    restart: unless-stopped
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+
+volumes:
+  data-documents: {}
+
+
+
+
+
+
+
